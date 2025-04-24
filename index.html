@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,24 +11,30 @@
         .card-header {
             font-weight: bold;
         }
+
         .completed {
             background-color: #e6ffe6;
         }
+
         .pending {
             background-color: #fff3e6;
         }
+
         .missed {
             background-color: #ffe6e6;
         }
+
         .subject-card {
             transition: all 0.3s ease;
         }
+
         .subject-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
+
 <body class="bg-light">
     <div class="container py-5">
         <div class="row justify-content-center">
@@ -36,12 +43,55 @@
                     <div class="card-header bg-primary text-white">
                         <h1 class="h4 mb-0">Sistema de Revisão de Estudos</h1>
                     </div>
+                    <div class="m-3 gap-2">
+                        <button id="exportData" class="btn btn-outline-primary">
+                            <i class="bi bi-download"></i> Exportar Dados
+                        </button>
+                        <button id="importData" class="btn btn-outline-success">
+                            <i class="bi bi-upload"></i> Importar Dados
+                        </button>
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                    </div>
                     <div class="card-body">
                         <form id="studyForm" class="mb-4">
                             <div class="row g-3">
                                 <div class="col-md-5">
-                                    <label for="subjectName" class="form-label">Nome do Assunto</label>
-                                    <input type="text" class="form-control" id="subjectName" required>
+                                    <label for="subjectSelect" class="form-label">Assunto</label>
+                                    <select class="form-select" id="subjectSelect" required>
+                                        <option value="" selected disabled>Selecione um assunto</option>
+                                        <option value="Esquizofrenia e transtornos psicóticos">Esquizofrenia e
+                                            transtornos psicóticos</option>
+                                        <option value="Transtornos alimentares">Transtornos alimentares</option>
+                                        <option value="Transtornos de personalidade">Transtornos de personalidade
+                                        </option>
+                                        <option value="Psicologia Médica">Psicologia Médica</option>
+                                        <option value="Introdução à psiquiatria">Introdução à psiquiatria</option>
+                                        <option value="Transtornos do humor">Transtornos do humor</option>
+                                        <option value="Transtornos de ansiedade">Transtornos de ansiedade</option>
+                                        <option value="Emergências em psiquiatria">Emergências em psiquiatria</option>
+                                        <option value="Transtornos mentais orgânicos">Transtornos mentais orgânicos
+                                        </option>
+                                        <option value="Transtornos somatoformes, dissociativos e factícios">Transtornos
+                                            somatoformes, dissociativos e factícios</option>
+                                        <option value="Psiquiatria infantil">Psiquiatria infantil</option>
+                                        <option value="Psicofarmacologia e outros tratamentos em psiquiatria">
+                                            Psicofarmacologia e outros tratamentos em psiquiatria</option>
+                                        <option value="Transtornos mentais decorrentes de substâncias psicoativas">
+                                            Transtornos mentais decorrentes de substâncias psicoativas</option>
+                                        <option value="Dependência químicas">Dependência químicas</option>
+                                        <option value="TOC">TOC</option>
+                                        <option value="Psicopatologia">Psicopatologia</option>
+                                        <option value="Psiquiatria social">Psiquiatria social</option>
+                                        <option value="Intoxicações exógenas">Intoxicações exógenas</option>
+                                        <option value="TEPT">TEPT</option>
+                                        <option value="Transtornos neurocognitivos (delirium)">Transtornos
+                                            neurocognitivos (delirium)</option>
+                                        <option value="Outro">Outro (especifique)</option>
+                                    </select>
+                                    <div id="customSubjectContainer" class="mt-2" style="display: none;">
+                                        <input type="text" class="form-control" id="customSubject"
+                                            placeholder="Digite o assunto">
+                                    </div>
                                 </div>
                                 <div class="col-md-3">
                                     <label for="studyDate" class="form-label">Data do Primeiro Estudo</label>
@@ -49,7 +99,8 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label for="successRate" class="form-label">Taxa de Acerto (%)</label>
-                                    <input type="number" class="form-control" id="successRate" min="0" max="100" required>
+                                    <input type="number" class="form-control" id="successRate" min="0" max="100"
+                                        required>
                                 </div>
                                 <div class="col-md-2 d-flex align-items-end">
                                     <button type="submit" class="btn btn-primary w-100">
@@ -101,7 +152,8 @@
                         <input type="hidden" id="revisionIdToComplete">
                         <div class="mb-3">
                             <label for="revisionSuccessRate" class="form-label">Taxa de Acerto nesta Revisão (%)</label>
-                            <input type="number" class="form-control" id="revisionSuccessRate" min="0" max="100" required>
+                            <input type="number" class="form-control" id="revisionSuccessRate" min="0" max="100"
+                                required>
                         </div>
                     </form>
                 </div>
@@ -112,6 +164,8 @@
             </div>
         </div>
     </div>
+
     <script src="script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </html>
