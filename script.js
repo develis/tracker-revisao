@@ -82,14 +82,12 @@ function addSubject(name, studyDate, successRate) {
 
 function calculateRevisions(studyDate, successRate) {
     const firstStudyDate = new Date(studyDate);
-    // Forçar a data inicial para 00:00:00 para evitar problemas com fusos horários
     firstStudyDate.setHours(0, 0, 0, 0);
     
     const revisions = [];
 
-    // Revisão 1: 2 dias após o estudo
     const revision1Date = new Date(firstStudyDate);
-    revision1Date.setDate(revision1Date.getDate() + 2);  // Adicionar 2 dias
+    revision1Date.setDate(revision1Date.getDate() + 3);
     revisions.push({
         id: 'r1-' + Date.now(),
         type: 'Revisão 1',
@@ -99,9 +97,8 @@ function calculateRevisions(studyDate, successRate) {
         successRate: null
     });
 
-    // Revisão 2: 7 dias após a revisão 1
     const revision2Date = new Date(revision1Date);
-    revision2Date.setDate(revision2Date.getDate() + 7);  // Adicionar 7 dias
+    revision2Date.setDate(revision2Date.getDate() + 7);
     revisions.push({
         id: 'r2-' + Date.now(),
         type: 'Revisão 2',
@@ -111,10 +108,9 @@ function calculateRevisions(studyDate, successRate) {
         successRate: null
     });
 
-    // Revisão 3: Se a taxa de acerto for <= 70%, 15 dias após a revisão 2
     if (successRate <= 70) {
         const revision3Date = new Date(revision2Date);
-        revision3Date.setDate(revision3Date.getDate() + 15);  // Adicionar 15 dias
+        revision3Date.setDate(revision3Date.getDate() + 15);
         revisions.push({
             id: 'r3-' + Date.now(),
             type: 'Revisão 3',
