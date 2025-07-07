@@ -1,45 +1,140 @@
+let categoriesData = {};
+
+async function loadCategories() {
+  try {
+    const response = await fetch('static/json/subjects.json');
+    categoriesData = await response.json();
+
+    const categorySelect = document.getElementById('categorySelect');
+    categorySelect.innerHTML = '<option value="" selected disabled>Selecione uma categoria</option>';
+
+    Object.keys(categoriesData).forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      categorySelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error('Erro ao carregar as categorias:', error);
+  }
+}
+
+document.getElementById('categorySelect').addEventListener('change', function () {
+    const selectedCategory = this.value;
+    const subjectSelect = document.getElementById('subjectSelect');
+    const customSubjectInput = document.getElementById('customSubject');
+  
+    subjectSelect.innerHTML = '<option value="" selected disabled>Selecione um assunto</option>';
+    customSubjectInput.style.display = 'none';
+    customSubjectInput.value = '';
+  
+    if (selectedCategory && categoriesData[selectedCategory]) {
+      categoriesData[selectedCategory].forEach(subject => {
+        const option = document.createElement('option');
+        option.value = subject;
+        option.textContent = subject;
+        subjectSelect.appendChild(option);
+      });
+  
+      subjectSelect.disabled = false;
+    } else {
+      subjectSelect.disabled = true;
+    }
+  });
+
+  document.getElementById('subjectSelect').addEventListener('change', function () {
+    const customSubjectInput = document.getElementById('customSubject');
+  
+    if (this.value === 'Outro') {
+      customSubjectInput.style.display = 'block';
+      customSubjectInput.required = true;
+    } else {
+      customSubjectInput.style.display = 'none';
+      customSubjectInput.required = false;
+      customSubjectInput.value = '';
+    }
+  });
+
+
 document.addEventListener('DOMContentLoaded', function () {
     if (!localStorage.getItem('studySubjects')) {
         localStorage.setItem('studySubjects', JSON.stringify([]));
     }
-
+    
+    loadCategories();
     loadSubjects();
     loadRevisions();
 
     document.getElementById('studyForm').addEventListener('submit', function (e) {
         e.preventDefault();
-
+      
+        const category = document.getElementById('categorySelect').value;
         const subjectSelect = document.getElementById('subjectSelect');
-        const customSubject = document.getElementById('customSubject').value;
-
-        let subjectName;
-        if (subjectSelect.value === 'Outro') {
-            subjectName = customSubject;
-        } else {
-            subjectName = subjectSelect.value;
-        }
-
+        const selectedSubject = subjectSelect.value;
+        const customSubjectInput = document.getElementById('customSubject').value.trim();
         const studyDateInput = document.getElementById('studyDate').value;
+        const totalQuestions = parseInt(document.getElementById('totalQuestions').value);
+        const correctAnswers = parseInt(document.getElementById('correctAnswers').value);
+        
+        if (isNaN(totalQuestions) || isNaN(correctAnswers) || totalQuestions <= 0 || correctAnswers < 0 || correctAnswers > totalQuestions) {
+          alert('Preencha corretamente o número de questões e acertos.');
+          return;
+        }
+        
+        const successRate = Math.round((correctAnswers / totalQuestions) * 100);
+              
+        if (!category) {
+          alert('Por favor, selecione uma categoria.');
+          return;
+        }
+      
+        let subjectToUse = '';
+      
+        if (selectedSubject === 'Outro') {
+          if (!customSubjectInput) {
+            alert('Por favor, digite o assunto.');
+            return;
+          }
+          subjectToUse = customSubjectInput;
+        } else if (selectedSubject) {
+          subjectToUse = selectedSubject;
+        } else {
+          alert('Por favor, selecione um assunto.');
+          return;
+        }
+      
         const [year, month, day] = studyDateInput.split('-').map(Number);
         const studyDate = new Date(year, month - 1, day);
-        const successRate = parseInt(document.getElementById('successRate').value);
-
-        if (subjectName && studyDate && !isNaN(successRate)) {
-            addSubject(subjectName, studyDate, successRate);
-            document.getElementById('studyForm').reset();
-            document.getElementById('customSubjectContainer').style.display = 'none';
+      
+        if (studyDate && !isNaN(successRate)) {
+          const fullSubjectName = `${category} - ${subjectToUse}`;
+          addSubject(fullSubjectName, studyDate, successRate);
+          this.reset();
+          document.getElementById('subjectSelect').disabled = true;
+          document.getElementById('customSubject').style.display = 'none';
+          document.getElementById('customSubject').required = false;
+        } else {
+          alert('Por favor, preencha todos os campos corretamente.');
         }
-    });
+      });
+      
+    
     
     document.getElementById('confirmCompleteRevision').addEventListener('click', function () {
         const revisionId = document.getElementById('revisionIdToComplete').value;
-        const successRate = parseInt(document.getElementById('revisionSuccessRate').value);
-
-        if (!isNaN(successRate)) {
-            completeRevision(revisionId, successRate);
-            const modal = bootstrap.Modal.getInstance(document.getElementById('completeRevisionModal'));
-            modal.hide();
+        const totalQuestions = parseInt(document.getElementById('revisionTotalQuestions').value);
+        const correctAnswers = parseInt(document.getElementById('revisionCorrectAnswers').value);
+        
+        if (isNaN(totalQuestions) || isNaN(correctAnswers) || totalQuestions <= 0 || correctAnswers < 0 || correctAnswers > totalQuestions) {
+          alert('Preencha corretamente o número de questões e acertos.');
+          return;
         }
+        
+        const successRate = Math.round((correctAnswers / totalQuestions) * 100);
+        completeRevision(revisionId, successRate);
+        const modal = bootstrap.Modal.getInstance(document.getElementById('completeRevisionModal'));
+        modal.hide();
+        
     });
 
     document.getElementById('exportData').addEventListener('click', exportData);
@@ -49,17 +144,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.getElementById('importFile').addEventListener('change', importData);
-});
-
-document.getElementById('subjectSelect').addEventListener('change', function () {
-    const customSubjectContainer = document.getElementById('customSubjectContainer');
-    if (this.value === 'Outro') {
-        customSubjectContainer.style.display = 'block';
-        document.getElementById('customSubject').required = true;
-    } else {
-        customSubjectContainer.style.display = 'none';
-        document.getElementById('customSubject').required = false;
-    }
 });
 
 function addSubject(name, studyDate, successRate) {
@@ -165,86 +249,165 @@ function loadSubjects() {
     });
 }
 
+let currentSortKey = null;
+let currentSortDirection = 'asc';
+
 function loadRevisions() {
-    const subjects = JSON.parse(localStorage.getItem('studySubjects'));
-    const tableBody = document.getElementById('revisionsTable');
-    tableBody.innerHTML = '';
+  const subjects = JSON.parse(localStorage.getItem('studySubjects'));
+  const tableBody = document.getElementById('revisionsTable');
+  tableBody.innerHTML = '';
 
-    let allRevisions = [];
+  let allRevisions = [];
 
-    subjects.forEach(subject => {
-        subject.revisions.forEach(revision => {
-            allRevisions.push({
-                ...revision,
-                subjectId: subject.id,
-                subjectName: subject.name
-            });
-        });
+  subjects.forEach(subject => {
+    subject.revisions.forEach(revision => {
+      allRevisions.push({
+        ...revision,
+        subjectId: subject.id,
+        subjectName: subject.name
+      });
     });
+  });
 
-    allRevisions.sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate));
+  allRevisions = allRevisions.map(rev => {
+    const [categoria, ...assuntoParts] = rev.subjectName.split(' - ');
+    return {
+      ...rev,
+      categoria: categoria || '',
+      assunto: assuntoParts.join(' - ') || rev.subjectName
+    };
+  });
 
-    if (allRevisions.length === 0) {
-        tableBody.innerHTML = `
-            <tr>
-                <td colspan="5" class="text-center text-muted py-4">Nenhuma revisão agendada.</td>
-            </tr>
-        `;
-        return;
+  if (currentSortKey) {
+    allRevisions.sort((a, b) => {
+      let valA, valB;
+      switch (currentSortKey) {
+        case 'categoria':
+          valA = a.categoria.toLowerCase();
+          valB = b.categoria.toLowerCase();
+          break;
+        case 'assunto':
+          valA = a.assunto.toLowerCase();
+          valB = b.assunto.toLowerCase();
+          break;
+        case 'tipo':
+          valA = a.type.toLowerCase();
+          valB = b.type.toLowerCase();
+          break;
+        case 'data':
+          valA = new Date(a.scheduledDate);
+          valB = new Date(b.scheduledDate);
+          break;
+        case 'status':
+          valA = getStatusOrder(a);
+          valB = getStatusOrder(b);
+          break;
+        default:
+          valA = '';
+          valB = '';
+      }
+
+      if (valA < valB) return currentSortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return currentSortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
+  if (allRevisions.length === 0) {
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="text-center text-muted py-4">Nenhuma revisão agendada.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  function getStatusOrder(rev) {
+    if (rev.completed) return 1;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const scheduledDate = new Date(rev.scheduledDate);
+    if (scheduledDate < today) return 3;
+    return 2; 
+  }
+
+  allRevisions.forEach(revision => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const scheduledDate = new Date(revision.scheduledDate);
+
+    let status = '';
+    let rowClass = '';
+
+    if (revision.completed) {
+      status = `<span class="badge bg-success">Concluído (${revision.successRate}%)</span>`;
+      rowClass = 'completed';
+    } else if (scheduledDate < today) {
+      status = '<span class="badge bg-danger">Atrasada</span>';
+      rowClass = 'missed';
+    } else {
+      status = '<span class="badge bg-warning text-dark">Pendente</span>';
+      rowClass = 'pending';
     }
 
-    allRevisions.forEach(revision => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const scheduledDate = new Date(revision.scheduledDate);
+    const row = document.createElement('tr');
+    row.className = rowClass;
+    row.innerHTML = `
+      <td>${revision.categoria}</td>
+      <td>${revision.assunto}</td>
+      <td>${revision.type}</td>
+      <td>${formatDate(revision.scheduledDate)}</td>
+      <td>${status}</td>
+      <td>
+        ${!revision.completed ? `
+          <button class="btn btn-sm btn-success complete-revision" data-id="${revision.id}" data-subject-id="${revision.subjectId}">
+            <i class="bi bi-check"></i> Concluir
+          </button>
+        ` : ''}
+      </td>
+    `;
+    tableBody.appendChild(row);
+  });
 
-        let status = '';
-        let rowClass = '';
+  document.querySelectorAll('.complete-revision').forEach(button => {
+    button.addEventListener('click', function () {
+      const revisionId = this.getAttribute('data-id');
+      const subjectId = this.getAttribute('data-subject-id');
 
-        if (revision.completed) {
-            status = `<span class="badge bg-success">Concluído (${revision.successRate}%)</span>`;
-            rowClass = 'completed';
-        } else if (scheduledDate < today) {
-            status = '<span class="badge bg-danger">Atrasada</span>';
-            rowClass = 'missed';
-        } else {
-            status = '<span class="badge bg-warning text-dark">Pendente</span>';
-            rowClass = 'pending';
-        }
-
-        const row = document.createElement('tr');
-        row.className = rowClass;
-        row.innerHTML = `
-            <td>${revision.subjectName}</td>
-            <td>${revision.type}</td>
-            <td>${formatDate(revision.scheduledDate)}</td>
-            <td>${status}</td>
-            <td>
-                ${!revision.completed ? `
-                    <button class="btn btn-sm btn-success complete-revision" data-id="${revision.id}" data-subject-id="${revision.subjectId}">
-                        <i class="bi bi-check"></i> Concluir
-                    </button>
-                ` : ''}
-            </td>
-        `;
-        tableBody.appendChild(row);
+      document.getElementById('revisionIdToComplete').value = revisionId;
+      document.getElementById('completeRevisionForm').setAttribute('data-subject-id', subjectId);
+      document.getElementById('revisionTotalQuestions').value = '';
+      document.getElementById('revisionCorrectAnswers').value = '';
+      
+      const modal = new bootstrap.Modal(document.getElementById('completeRevisionModal'));
+      modal.show();
     });
-
-    document.querySelectorAll('.complete-revision').forEach(button => {
-        button.addEventListener('click', function () {
-            const revisionId = this.getAttribute('data-id');
-            const subjectId = this.getAttribute('data-subject-id');
-
-            document.getElementById('revisionIdToComplete').value = revisionId;
-            document.getElementById('completeRevisionForm').setAttribute('data-subject-id', subjectId);
-            document.getElementById('revisionSuccessRate').value = '';
-
-            const modal = new bootstrap.Modal(document.getElementById('completeRevisionModal'));
-            modal.show();
-        });
-    });
+  });
 }
 
+function setupTableSorting() {
+  const headers = document.querySelectorAll('thead th[data-sort-key]');
+  headers.forEach(header => {
+    header.style.cursor = 'pointer';
+    header.addEventListener('click', () => {
+      const key = header.getAttribute('data-sort-key');
+
+      if (currentSortKey === key) {
+        currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+      } else {
+        currentSortKey = key;
+        currentSortDirection = 'asc';
+      }
+      loadRevisions();
+    });
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  setupTableSorting();
+});
+
+  
 function completeRevision(revisionId, successRate) {
     const subjectId = document.getElementById('completeRevisionForm').getAttribute('data-subject-id');
     const subjects = JSON.parse(localStorage.getItem('studySubjects'));
