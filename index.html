@@ -55,7 +55,7 @@
             </div>
         </div>
     </nav>
-    
+
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-lg-10">
@@ -75,45 +75,46 @@
                     <div class="card-body">
                         <form id="studyForm" class="mb-4">
                             <div class="row g-3">
-                              <div class="col-md-5">
-                                <label for="categorySelect" class="form-label">Categoria</label>
-                                <select class="form-select" id="categorySelect" required>
-                                  <option value="" selected disabled>Selecione uma categoria</option>
-                                </select>
-                              </div>
-                          
-                              <div class="col-md-5">
-                                <label for="subjectSelect" class="form-label">Assunto</label>
-                                <select class="form-select" id="subjectSelect" required disabled>
-                                    <option value="" selected disabled>Selecione um assunto</option>
-                                </select>
-                                <input type="text" class="form-control mt-2" id="customSubject" placeholder="Digite o assunto" style="display:none;">
+                                <div class="col-md-5">
+                                    <label for="categorySelect" class="form-label">Categoria</label>
+                                    <select class="form-select" id="categorySelect" required>
+                                        <option value="" selected disabled>Selecione uma categoria</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <label for="subjectSelect" class="form-label">Assunto</label>
+                                    <select class="form-select" id="subjectSelect" required disabled>
+                                        <option value="" selected disabled>Selecione um assunto</option>
+                                    </select>
+                                    <input type="text" class="form-control mt-2" id="customSubject"
+                                        placeholder="Digite o assunto" style="display:none;">
+                                </div>
+
+
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="bi bi-plus-circle"></i> Adicionar
+                                    </button>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label for="studyDate" class="form-label">Data do Primeiro Estudo</label>
+                                    <input type="date" class="form-control" id="studyDate" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="totalQuestions" class="form-label">Total de Questões</label>
+                                    <input type="number" class="form-control" id="totalQuestions" required min="1">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="correctAnswers" class="form-label">Acertos</label>
+                                    <input type="number" class="form-control" id="correctAnswers" required min="0">
+                                </div>
+
+
                             </div>
-                            
-                          
-                              <div class="col-md-2 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary w-100">
-                                  <i class="bi bi-plus-circle"></i> Adicionar
-                                </button>
-                              </div>
-                          
-                              <div class="col-md-3">
-                                <label for="studyDate" class="form-label">Data do Primeiro Estudo</label>
-                                <input type="date" class="form-control" id="studyDate" required>
-                              </div>
-                              <div class="mb-3">
-                                <label for="totalQuestions" class="form-label">Total de Questões</label>
-                                <input type="number" class="form-control" id="totalQuestions" required min="1">
-                              </div>
-                              <div class="mb-3">
-                                <label for="correctAnswers" class="form-label">Acertos</label>
-                                <input type="number" class="form-control" id="correctAnswers" required min="0">
-                              </div>
-                              
-                              
-                            </div>
-                          </form>
-                          
+                        </form>
+
 
                         <div class="mb-4">
                             <h2 class="h5 mb-3">Seus Assuntos</h2>
@@ -127,14 +128,19 @@
                                 <table class="table table-hover">
                                     <thead class="table-light">
                                         <tr>
-                                          <th data-sort-key="categoria" style="cursor:pointer;">Categoria &#x25B2;&#x25BC;</th>
-                                          <th data-sort-key="assunto" style="cursor:pointer;">Assunto &#x25B2;&#x25BC;</th>
-                                          <th data-sort-key="tipo" style="cursor:pointer;">Tipo de Revisão &#x25B2;&#x25BC;</th>
-                                          <th data-sort-key="data" style="cursor:pointer;">Data Prevista &#x25B2;&#x25BC;</th>
-                                          <th data-sort-key="status" style="cursor:pointer;">Status &#x25B2;&#x25BC;</th>
-                                          <th>Ações</th>
+                                            <th data-sort-key="categoria" style="cursor:pointer;">Categoria
+                                                &#x25B2;&#x25BC;</th>
+                                            <th data-sort-key="assunto" style="cursor:pointer;">Assunto &#x25B2;&#x25BC;
+                                            </th>
+                                            <th data-sort-key="tipo" style="cursor:pointer;">Tipo de Revisão
+                                                &#x25B2;&#x25BC;</th>
+                                            <th data-sort-key="data" style="cursor:pointer;">Data Prevista
+                                                &#x25B2;&#x25BC;</th>
+                                            <th data-sort-key="status" style="cursor:pointer;">Status &#x25B2;&#x25BC;
+                                            </th>
+                                            <th>Ações</th>
                                         </tr>
-                                      </thead>
+                                    </thead>
                                     <tbody id="revisionsTable">
                                     </tbody>
                                 </table>
@@ -157,15 +163,15 @@
                     <form id="completeRevisionForm" data-subject-id="">
                         <input type="hidden" id="revisionIdToComplete">
                         <div class="mb-3">
-                          <label for="revisionTotalQuestions" class="form-label">Total de Questões</label>
-                          <input type="number" class="form-control" id="revisionTotalQuestions" min="1" required>
+                            <label for="revisionTotalQuestions" class="form-label">Total de Questões</label>
+                            <input type="number" class="form-control" id="revisionTotalQuestions" min="1" required>
                         </div>
                         <div class="mb-3">
-                          <label for="revisionCorrectAnswers" class="form-label">Acertos</label>
-                          <input type="number" class="form-control" id="revisionCorrectAnswers" min="0" required>
+                            <label for="revisionCorrectAnswers" class="form-label">Acertos</label>
+                            <input type="number" class="form-control" id="revisionCorrectAnswers" min="0" required>
                         </div>
-                      </form>
-                      
+                    </form>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
