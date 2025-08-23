@@ -36,7 +36,7 @@ export default class Subject {
         return revisions;
     }
 
-    addRevision(revisionType, successRate) {
+    addRevision(revisionType) {
         const lastRevision = this.revisions[this.revisions.length - 1];
         if (!lastRevision) return;
 
